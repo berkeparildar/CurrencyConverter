@@ -6,14 +6,16 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct ContentView: View {
     @State var upAmount: String = ""
-    @State var downAmount: String = ""
+    @State var downAmount: String = "Result"
     @State var selectedUpperCurrency: Bool = false
     @State var selectedLowerCurrency: Bool = false
     @State var upperCurrency: Currency = CurrencyManager.currencies[0]
     @State var lowerCurrency: Currency = CurrencyManager.currencies[1]
+    @FocusState var typing: Bool
     
     var body: some View {
         ZStack {
@@ -39,24 +41,37 @@ struct ContentView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .foregroundColor(.foreground)
-                                .padding()
+                                .padding(20)
+                                .popoverTip(CurrencyTip(), arrowEdge: .bottom)
+
                         )
                         .foregroundColor(.darkGrey)
                         .onTapGesture {
+                            typing = false
                             selectedUpperCurrency.toggle()
+                        }
+                        .onChange(of: upperCurrency) {
+                            downAmount = upperCurrency.convert(to: lowerCurrency, upAmount)
                         }
                     Rectangle()
                         .frame(width: 250, height: 100)
                         .cornerRadius(10)
                         .overlay(
                             TextField("Some", text: $upAmount, prompt: Text("Amount").foregroundStyle(.grey))
+                                .keyboardType(.decimalPad)
                                 .frame(width: 220, height: 90)
                                 .background(Color(.darkGrey))
-                                .multilineTextAlignment(.leading)
+                                .multilineTextAlignment(.center)
                                 .clipShape(.rect(cornerRadius: 9))
                                 .font(.system(size: 40, weight: .bold))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color(.foreground))
                                 .padding()
+                                .focused($typing)
+                                .onChange(of:upAmount) {
+                                    if typing {
+                                        downAmount = upperCurrency.convert(to: lowerCurrency, upAmount)
+                                    }
+                                }
                         )
                         .foregroundColor(.darkGrey)
                 }
@@ -65,14 +80,13 @@ struct ContentView: View {
                         .frame(width: 250, height: 100)
                         .cornerRadius(10)
                         .overlay(
-                            TextField("", text: $downAmount, prompt: Text("Amount").foregroundStyle(Color(.grey)))
+                            Text(downAmount).foregroundStyle(Color(.grey))
+                                .multilineTextAlignment(.leading)
                                 .foregroundStyle(.white)
-                                .frame(width: 220, height: 90)
                                 .font(.system(size: 40, weight: .bold))
                                 .background(.darkGrey)
-                                .multilineTextAlignment(.leading)
                                 .clipShape(.rect(cornerRadius: 9))
-                                .padding()
+                                .frame(width: 220, height: 90)
                         )
                         .foregroundColor(.darkGrey)
                     Rectangle()
@@ -83,24 +97,22 @@ struct ContentView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .foregroundColor(.foreground)
-                                .padding()
+                                .padding(20)
                         )
                         .foregroundColor(Color(.darkGrey))
                         .onTapGesture {
                             selectedLowerCurrency.toggle()
+                            typing = false
+                        }
+                        .onChange(of: lowerCurrency) {
+                            downAmount = upperCurrency.convert(to: lowerCurrency, upAmount)
                         }
                 }
-                Button (action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/){
-                    Text("Convert")
-                        .font(.title)
-                }
-                .frame(height: 50)
-                .frame(maxWidth: .infinity)
-                .background(.myGreen)
-                .foregroundColor(Color(.background))
-                .cornerRadius(10)
                 Spacer()
                 Spacer()
+            }
+            .task {
+                try? Tips.configure()
             }
             .foregroundStyle(Color(.white))
             .padding()
@@ -110,6 +122,25 @@ struct ContentView: View {
             .sheet(isPresented: $selectedLowerCurrency, content: {
                 CurrencySelect(selectedCurrency: $lowerCurrency)
             })
+            .onAppear {
+                fetchExchangeRates(self: self)
+            }
+        }
+    }
+}
+
+private func fetchExchangeRates(self: ContentView) {
+    CurrencyManager.fetchExchangeRates { result in
+        switch result {
+        case .success:
+            print("Exchange rates fetched successfully.")
+            self.upperCurrency = CurrencyManager.currencies[0]
+            self.lowerCurrency = CurrencyManager.currencies[1]
+            
+            // You can update your UI or perform additional actions on success.
+        case .failure(let error):
+            print("Failed to fetch exchange rates: \(error.localizedDescription)")
+            // Handle the error, show an alert, or perform other error-handling actions.
         }
     }
 }

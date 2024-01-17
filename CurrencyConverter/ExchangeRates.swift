@@ -7,9 +7,9 @@
 
 import Foundation
 struct ExchangeRates: Codable {
-    let disclaimer: String
-    let license: String
+    let success: Bool
     let timestamp: TimeInterval
     let base: String
+    let date: String
     let rates: [String: Double]
 }

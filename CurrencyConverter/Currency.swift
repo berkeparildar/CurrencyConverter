@@ -7,17 +7,26 @@
 
 import Foundation
 
-public struct Currency {
+public struct Currency: Equatable {
     
     var name: String
     var code: String
     var imageName: String
     var value: Double?
     
-    init(name: String, code: String, imageName: String, value: Double? = nil) {
+    init(name: String, code: String, imageName: String, value: Double) {
         self.name = name
         self.code = code
         self.imageName = imageName
         self.value = value
     }
+    
+    func convert(to targetCurrency: Currency, _ amountString: String) -> String {
+            guard let doubleAmount = Double(amountString) else { return "Result" }
+            guard let myValue = self.value else {return "Result"}
+            guard let targetValue = targetCurrency.value else {return "Result"}
+            let exchangeRate = targetValue / myValue
+            let convertedAmount = String(format: "%.2f", exchangeRate * doubleAmount)
+            return convertedAmount
+        }
 }
