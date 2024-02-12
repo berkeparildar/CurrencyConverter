@@ -21,13 +21,16 @@ struct ContentView: View {
         ZStack {
             Color(.background).edgesIgnoringSafeArea(.all)
             VStack {
+                Spacer()
                 VStack {
                     Text("Currency Converter")
                         .font(.largeTitle)
+                        .foregroundStyle(.myGreen)
                     Image(systemName: "coloncurrencysign.circle")
                         .resizable()
                         .scaledToFit()
                         .frame(height: 100)
+                        .foregroundStyle(.myGreen)
                 }
                 .foregroundStyle(Color(.foreground))
                 .padding()
@@ -43,7 +46,7 @@ struct ContentView: View {
                                 .foregroundColor(.foreground)
                                 .padding(20)
                                 .popoverTip(CurrencyTip(), arrowEdge: .bottom)
-
+                            
                         )
                         .foregroundColor(.darkGrey)
                         .onTapGesture {
@@ -114,6 +117,7 @@ struct ContentView: View {
             .task {
                 try? Tips.configure()
             }
+            
             .foregroundStyle(Color(.white))
             .padding()
             .sheet(isPresented: $selectedUpperCurrency, content: {
@@ -125,6 +129,9 @@ struct ContentView: View {
             .onAppear {
                 fetchExchangeRates(self: self)
             }
+        }
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
 }

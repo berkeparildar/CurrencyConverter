@@ -22,11 +22,12 @@ public struct Currency: Equatable {
     }
     
     func convert(to targetCurrency: Currency, _ amountString: String) -> String {
-            guard let doubleAmount = Double(amountString) else { return "Result" }
-            guard let myValue = self.value else {return "Result"}
-            guard let targetValue = targetCurrency.value else {return "Result"}
-            let exchangeRate = targetValue / myValue
-            let convertedAmount = String(format: "%.2f", exchangeRate * doubleAmount)
-            return convertedAmount
-        }
+        let formattedAmountString = amountString.replacingOccurrences(of: ",", with: ".")
+        guard let doubleAmount = Double(formattedAmountString) else { return "Result" }
+        guard let myValue = self.value else {return "Result"}
+        guard let targetValue = targetCurrency.value else {return "Result"}
+        let exchangeRate = targetValue / myValue
+        let convertedAmount = String(format: "%.2f", exchangeRate * doubleAmount)
+        return convertedAmount
+    }
 }

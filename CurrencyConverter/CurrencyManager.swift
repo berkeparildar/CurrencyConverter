@@ -24,7 +24,7 @@ class CurrencyManager: ObservableObject {
     ]
     
     static func fetchExchangeRates(completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "http://api.exchangeratesapi.io/v1/latest?access_key=&symbols=USD,TRY,EUR,AUD,SEK,JPY,CNY,RUB,KRW,CHF,PLN&format=1") else {
+        guard let url = URL(string: "http://api.exchangeratesapi.io/v1/latest?access_key=15b579b9f330be5031380fe062defcb5&symbols=USD,TRY,EUR,AUD,SEK,JPY,CNY,RUB,KRW,CHF,PLN&format=1") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
             return
         }
